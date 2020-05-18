@@ -1,0 +1,27 @@
+---
+- name: DAY1
+  hosts: all
+  gather_facts: true # remove later! speeds up testing
+  become: true
+
+  tasks:
+  - name: enable repos
+    template:
+      src: ./open_three-tier-app.repo
+      dest: /etc/yum.repos.d/open_three-tier-app.repo
+      mode: 0644
+  
+  - name: Deploy Haproxy
+    include_role:
+      name: haproxy
+    when: inventory_hostname in groups['frontends']
+  
+  - name: Deploy Tomcat
+    include_role:
+      name: tomcat
+    when: inventory_hostname in groups['apps']
+   
+  - name: Deploy postgresql
+    include_role:
+      name: postgresql
+    when: inventory_hostname in groups['appdbs']
